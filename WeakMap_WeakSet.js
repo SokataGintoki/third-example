@@ -13,7 +13,7 @@ let cache = new WeakMap();
 
 function cahcheUser (user) {
     if (!cache.has(user)) {
-        cache.set(user, Date.now())
+        cache.set(user, Date.now());
     }
 
     return cache.get(user);
