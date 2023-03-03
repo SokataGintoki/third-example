@@ -62,9 +62,13 @@
 
 const btn = document.querySelector('button');
 
-btn.addEventListener('click', function() {
-    console.log(this);
-    this.style.background = 'red';
+// btn.addEventListener('click', function() {
+//     console.log(this);
+//     this.style.background = 'red';
+// });
+
+btn.addEventListener('click', (e) => {
+    e.target.style.background = 'red';
 });
 
 const obj = {
@@ -79,3 +83,11 @@ const obj = {
 }
 
 obj.sayNumber();
+
+// const double = (a) => {
+//     return a * 2;
+// };
+
+const double = a => a * 2;
+
+console.log(double(4));
