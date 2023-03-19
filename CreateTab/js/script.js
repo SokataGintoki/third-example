@@ -44,7 +44,7 @@ window.addEventListener('DOMContentLoaded', () => {
    
     //Timer
 
-    const deadline = '2023-03-05';
+    const deadline = '2023-03-25';
 
     function getTimeRemaining(endtime) {
       let days, hours, minutes, seconds;
@@ -108,8 +108,7 @@ window.addEventListener('DOMContentLoaded', () => {
     //Modal
 
     const modalTrigger = document.querySelectorAll('[data-modal]'),
-          modal = document.querySelector('.modal'),
-          modalCloseBtn = document.querySelector('[data-close]');
+          modal = document.querySelector('.modal');
 
       function openModal() {
         modal.classList.add('show');
@@ -131,7 +130,7 @@ window.addEventListener('DOMContentLoaded', () => {
       document.body.style.overflow = '';
     };
 
-  modalCloseBtn.addEventListener('click', closeModal);
+  // modalCloseBtn.addEventListener('click', closeModal);
     // modalCloseBtn.addEventListener('click', () => {
     //   modal.classList.add('hide');
     //   modal.classList.remove('show');
@@ -140,7 +139,7 @@ window.addEventListener('DOMContentLoaded', () => {
     // });
 
   modal.addEventListener('click', (e) => {
-      if ( e.target === modal) {
+      if ( e.target === modal || e.target.getAttribute('data-close') =='') {
         closeModal();
       }
     });
@@ -164,7 +163,7 @@ window.addEventListener('DOMContentLoaded', () => {
   // Используем классы для карточек
 
   class MenuCard {
-    constructor (src, alt, title, descr, price, parentSelector, ... classes) {
+    constructor (src, alt, title, descr, price, parentSelector, ...classes) {
       this.src = src;
       this.alt = alt;
       this.title = title;
@@ -182,13 +181,14 @@ window.addEventListener('DOMContentLoaded', () => {
 
     render() {
       const element = document.createElement('div');
+
       if (this.classes.length === 0) {
-        this.element = 'menu__item';
-        element.classList.add(this.element);
+        this.classes = 'menu__item';
+        element.classList.add(this.classes);
       } else {
-        this.classes.forEach(className => element.classList.add(className));
+      this.classes.forEach(className => element.classList.add(className));
       }
-      
+
       element.innerHTML = `
           <img src=${this.src} alt=${this.alt}>
           <h3 class="menu__item-subtitle">${this.title}"</h3>
@@ -203,87 +203,71 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+   const getResource = async (url) => {
+      const res = await fetch(url);
+      if (!res.ok) {
+        throw new Error(`Could not fetch ${url}, status: ${res.status}`);
+      }
+      return await res.json();
+   };
 
-  getResource('http://localhost:3000/menu')
-  .then(data => {
-      data.forEach(({img, altimg, title, descr, price}) => {
-          new MenuCard(img, altimg, title, descr, price, ".menu .container").render();
-      });
+  // getResource('http://localhost:3000/menu')
+  //   .then(data => {
+      // data.forEach(({img, altimg, title, descr, price}) => {
+      //   new MenuCard(img, altimg, title, descr, price, '.menu .container').render();
+  //     });
+  //   });
+
+  axios.get(`http://localhost:3000/menu`)
+   .then(data => {
+    data.data.forEach(({img, altimg, title, descr, price}) => {
+      new MenuCard(img, altimg, title, descr, price, '.menu .container').render();
+   });
+  });
+  
+    //Forms
+
+  const forms = document.querySelectorAll('form');
+
+  const message = {
+    loading: 'img/form/spinner.svg',
+    success: 'Спасибо! Скоро вы с вами свяжемся',
+    failure: 'Что-то пошло не так...'
+  };
+
+  forms.forEach(item => {
+    bindPostData(item);
   });
 
-// getResource('http://localhost:3000/menu')
-//     .then(data => createCard(data));
-
-// function createCard(data) {
-//     data.forEach(({img, altimg, title, descr, price}) => {
-//         const element = document.createElement('div');
-
-//         element.classList.add("menu__item");
-
-//         element.innerHTML = `
-//             <img src=${img} alt=${altimg}>
-//             <h3 class="menu__item-subtitle">${title}</h3>
-//             <div class="menu__item-descr">${descr}</div>
-//             <div class="menu__item-divider"></div>
-//             <div class="menu__item-price">
-//                 <div class="menu__item-cost">Цена:</div>
-//                 <div class="menu__item-total"><span>${price}</span> грн/день</div>
-//             </div>
-//         `;
-//         document.querySelector(".menu .container").append(element);
-//     });
-// }
-
-// Forms
-
-const forms = document.querySelectorAll('form');
-const message = {
-  loading: 'img/form/spinner.svg',
-  success: 'Спасибо! Скоро мы с вами свяжемся',
-  failure: 'Что-то пошло не так...'
-};
-
-forms.forEach(item => {
-  bindPostData(item);
-});
-
-const postData = async (url, data) => {
-  let res = await fetch(url, {
-      method: "POST",
+  const postData = async (url, data) => {
+    const res = await fetch(url, {
+      method: 'POST',
       headers: {
           'Content-Type': 'application/json'
       },
       body: data
-  });
+    });
 
-  return await res.json();
-};
+    return await res.json();
+  };
 
-async function getResource(url) {
-  let res = await fetch(url);
+  function bindPostData(form) {
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
 
-  if (!res.ok) {
-      throw new Error(`Could not fetch ${url}, status: ${res.status}`);
-  }
-
-  return await res.json();
-}
-
-function bindPostData(form) {
-  form.addEventListener('submit', (e) => {
-      e.preventDefault();
-
-      let statusMessage = document.createElement('img');
-      statusMessage.src = message.loading;
-      statusMessage.style.cssText = `
+        let statusMessage = document.createElement('img');
+        statusMessage.src = message.loading;
+        statusMessage.style.cssText = `
           display: block;
           margin: 0 auto;
-      `;
-      form.insertAdjacentElement('afterend', statusMessage);
+       `;    
+        // form.append(statusMessage);
+        form.insertAdjacentElement('afterend', statusMessage);
   
-      const formData = new FormData(form);
+        const formData = new FormData(form);
 
-      const json = JSON.stringify(Object.fromEntries(formData.entries()));
+        const json = JSON.stringify(Object.fromEntries(formData.entries()));
+        // console.log(Object.entries(obj));
 
       postData('http://localhost:3000/requests', json)
       .then(data => {
@@ -297,37 +281,54 @@ function bindPostData(form) {
       });
   });
 }
-    function showThanksModal(message) {
-      const prevModalDialog = document.querySelector('.modal__dialog');
-  
-      prevModalDialog.classList.add('hide');
-      openModal();
-  
-      const thanksModal = document.createElement('div');
-      thanksModal.classList.add('modal__dialog');
-      thanksModal.innerHTML = `
-      <div class="modal__content">
-        <div class="modal__close" data-close>×</div>
-        <div class="modal__title">${message}</div>
-      </div>
-      `;
-  
-      document.querySelector('.modal').append(thanksModal);
-      setTimeout(() => {
-          thanksModal.remove();
-          prevModalDialog.classList.add('show');
-          prevModalDialog.classList.remove('hide');
-          closeModal();
-      }, 4000);
-  }
-  
-  // fetch('https://jsonplaceholder.typicode.com/posts', {
-  //   method: "POST",
-  //   body: JSON.stringify({name: 'Alex'}),
-  //   headers: {
-  //     'Content-type': 'application/json'
-  //   }
-  // })
-  //     .then(response => response.json())
-  //     .then(json => console.log(json));
-};
+
+  function showThanksModal(message) {
+    const prevModalDialog = document.querySelector('.modal__dialog');
+
+    prevModalDialog.classList.add('hide');
+    openModal();
+
+    const thanksModal = document.createElement('div');
+    thanksModal.classList.add('modal__dialog');
+    thanksModal.innerHTML = `
+    <div class="modal__content">
+      <div class="modal__close" data-close>×</div>
+      <div class="modal__title">${message}</div>
+    </div>
+    `;
+
+    document.querySelector('.modal').append(thanksModal);
+    setTimeout(() => {
+        thanksModal.remove();
+        prevModalDialog.classList.add('show');
+        prevModalDialog.classList.remove('hide');
+        closeModal();
+    }, 4000);
+}
+});
+
+//   form.addEventListener('submit', (e) => {
+//     e.preventDefault();
+
+//     let statusMessage = document.createElement('div');
+//     statusMessage.classList.add('status');
+//     statusMessage.textContent = message.loading;
+//     form.append(statusMessage);
+
+//     const request = new XMLHttpRequest();
+//     request.open('POST', 'server.php');
+//     request.setRequestHeader('Content-type', 'multipart/form-data');
+//     const formData = new FormData(form);
+
+//     request.send(formData);
+
+//     request.addEventListener('load', () => {
+//       if (request.status === 200) {
+//         console.log(request.response);
+//         statusMessage.textContent = message.success;
+//       } else {
+//         statusMessage.textContent = message.failure;
+//       }
+//     });
+//   });
+// }
