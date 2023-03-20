@@ -305,30 +305,51 @@ window.addEventListener('DOMContentLoaded', () => {
         closeModal();
     }, 4000);
 }
+    // Slider
+
+    let slideIndex = 1;
+    const slides = document.querySelectorAll('.offer__slide'),
+        prev = document.querySelector('.offer__slider-prev'),
+        next = document.querySelector('.offer__slider-next'),
+        total = document.querySelector('#total'),
+        current = document.querySelector('#current');
+
+    showSlides(slideIndex);
+
+    if (slides.length < 10) {
+        total.textContent = `0${slides.length}`;
+    } else {
+        total.textContent = slides.length;
+    }
+
+    function showSlides(n) {
+        if (n > slides.length) {
+            slideIndex = 1;
+        }
+        if (n < 1) {
+            slideIndex = slides.length;
+        }
+
+        slides.forEach((item) => item.style.display = 'none');
+
+        slides[slideIndex - 1].style.display = 'block';
+        
+        if (slides.length < 10) {
+            current.textContent =  `0${slideIndex}`;
+        } else {
+            current.textContent =  slideIndex;
+        }
+    }
+
+    function plusSlides (n) {
+        showSlides(slideIndex += n);
+    }
+
+    prev.addEventListener('click', function(){
+        plusSlides(-1);
+    });
+
+    next.addEventListener('click', function(){
+        plusSlides(1);
+    });
 });
-
-//   form.addEventListener('submit', (e) => {
-//     e.preventDefault();
-
-//     let statusMessage = document.createElement('div');
-//     statusMessage.classList.add('status');
-//     statusMessage.textContent = message.loading;
-//     form.append(statusMessage);
-
-//     const request = new XMLHttpRequest();
-//     request.open('POST', 'server.php');
-//     request.setRequestHeader('Content-type', 'multipart/form-data');
-//     const formData = new FormData(form);
-
-//     request.send(formData);
-
-//     request.addEventListener('load', () => {
-//       if (request.status === 200) {
-//         console.log(request.response);
-//         statusMessage.textContent = message.success;
-//       } else {
-//         statusMessage.textContent = message.failure;
-//       }
-//     });
-//   });
-// }
